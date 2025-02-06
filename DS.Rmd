@@ -1,0 +1,325 @@
+---
+title: "DS"
+output: html_document
+date: "2025-02-06"
+---
+#---------------------------------CALCOLO RATEO VITTORIE---------------------------------------------------
+
+vittorie <- apply(matchups,1,function(riga) sum(riga== "WIN", na.rm = TRUE)) #sommo le win
+sconfitte <- apply(matchups,1,function(riga) sum(riga == "LOSE", na.rm = TRUE)) #sommo le lose
+pareggi <- apply(matchups,1, function (riga) sum(riga == "DRAW", na.rm = TRUE)) #sommo draw
+partite_giocate <- apply(matchups, 1, function(riga) sum(riga %in% c("WIN", "LOSE","DRAW"))) #sommo partite totali
+win_rate <- vittorie / partite_giocate #calcolo rateo vittoria
+results <- data.frame (   #creazione data frame con fazione win lose draw win rate
+  Fazione = matchups[[1]],
+  Vittorie = vittorie,
+  Sconfitte = sconfitte,
+  Pareggi = pareggi,
+  PartiteGiocate = partite_giocate,
+  WinRate = win_rate
+)
+
+print(results)
+
+#---------------------------------GRAFICO WINRATE----------------------------------------------------------
+
+
+library(ggplot2)
+
+ggplot(results, aes(x = Fazione, y = WinRate, fill = Fazione)) +        #grafico con y=win rate e x=fazioni
+  geom_bar(stat = "identity") +
+  labs(title = "Win Rate per Fazione", y = "Win Rate", x = "Fazione") +
+  theme_minimal() +
+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 10)) +
+ 
+  scale_x_discrete(expand = c(0.2, 0.2))
+
+#---------------------------------MODIFICHE ERRORI---------------------------------------------------------
+
+
+AELDAR1$armata <- "AELDAR1"
+
+AELDAR2$armata <- "AELDAR2"
+
+AS$armata <- "AS"
+
+BT$armata <- "BT"
+
+CD$armata <- "CD"
+
+DA$armata <- "DA"
+
+GC1$armata <- "GC1"
+
+GC2$armata <- "GC2"
+
+DG$armata <- "DG"
+
+
+GK$armata <- "GK"
+
+GUARD$armata <- "GUARD"
+
+NECRON$armata <- "NECRON"
+
+NIDS$armata <- "NIDS"
+
+ORKS1$armata <- "ORKS1"
+
+ORSK2$armata <- "ORKS2"
+
+SM$armata <- "SM"
+
+SW$armata <- "SW"
+
+TAU1$armata <- "TAU1"
+
+TAU2$armata <- "TAU2"
+
+
+
+
+mega_tabella <- rbind(AELDAR1,AELDAR2,AS,BT,CD,DA,DG,GC1,GC2,GK,GUARD,NECRON,NIDS,ORKS1,ORSK2,SM,SW,TAU1,TAU2)
+colnames(mega_tabella)[1] <- "tipo_unità"
+colnames(AELDAR1)[1] <- "tipo_unità"
+colnames(AELDAR2)[1] <- "tipo_unità"
+colnames(AS)[1] <- "tipo_unità"
+colnames(BT)[1] <- "tipo_unità"
+colnames(CD)[1] <- "tipo_unità"
+colnames(DA)[1] <- "tipo_unità"
+colnames(DG)[1] <- "tipo_unità"
+colnames(GC1)[1] <- "tipo_unità"
+colnames(GC2)[1] <- "tipo_unità"
+colnames(GK)[1] <- "tipo_unità"
+colnames(GUARD)[1] <- "tipo_unità"
+colnames(NECRON)[1] <- "tipo_unità"
+colnames(NIDS)[1] <- "tipo_unità"
+colnames(ORKS1)[1] <- "tipo_unità"
+colnames(ORSK2)[1] <- "tipo_unità"
+colnames(SM)[1] <- "tipo_unità"
+colnames(SW)[1] <- "tipo_unità"
+colnames(TAU1)[1] <- "tipo_unità"
+colnames(TAU2)[1] <- "tipo_unità"
+
+#---------------------------------GRAFICO COMPARAZIONI TOTALE----------------------------------------------
+
+
+library(shiny)
+library(ggplot2)                                    
+library(plotly)
+
+# UI con nome principale e selettore delle statistiche da andare a pescare nella tabella
+ui <- fluidPage(
+  titlePanel("Confronto Statistiche per Modelli e Armate"),
+  
+  sidebarLayout(
+    sidebarPanel(
+      #seleziona statistica
+      selectInput("statistica", "Seleziona una statistica da visualizzare:",
+                  choices = colnames(mega_tabella)[!(colnames(mega_tabella) %in% c("tipo_unità", "armata","Armata_completa"))])
+    ),
+    mainPanel(
+      #output grafico
+      plotlyOutput("grafico", height = "600px", width = "800px")
+    )
+  )
+)
+
+# Server
+server <- function(input, output) {
+  
+  # Render del grafico con il tipo di unità sull asse x e la statistica sull asse y
+  output$grafico <- renderPlotly({
+    gg <- ggplot(mega_tabella, aes_string(x = "tipo_unità", y = input$statistica, fill = "armata")) +
+      geom_bar(stat = "identity", position = "dodge", color = "black") +
+      labs(title = paste("Statistica:", input$statistica),
+           x = "tipo_unità", y = input$statistica, fill = "armata") +
+      theme_minimal() +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+    
+    ggplotly(gg)
+  })
+}
+
+# Avvia l'app
+shinyApp(ui = ui, server = server)
+
+#---------------------------------MODIFICHE ERRORI --------------------------------------------------------
+
+
+fazioni_mappa <- c("DG"= "Death_Guard",
+                   "GK"= "Grey_Knights",
+                   "TAU1"="T'au_Empire",
+                   "ORKS1"="Orks",
+                   "GUARD"="Astra_Militarum",
+                   "TAU2"="T'au_Empire2",
+                   "GC1"="Genestealer_Cults",
+                   "GC2"="Genestealer_Cults2",
+                   "NECRON"="Necron",
+                   "ORSK2"="Orks2",
+                   "AELDAR1"="Aeldari",
+                   "DA"="Dark_Angels",
+                   "AELDAR2"="Aeldari2",
+                   "CD"="Chaos_Daemons",
+                   "SW"="Space_Wolves",
+                   "SM"="Space_Marines",
+                   "BT"="Black_Templars",
+                   "NIDS"="Tyranids",
+                   "AS"="Adepta_Sororita")
+
+library(dplyr)
+library(tidyr)
+mega_tabella <- mega_tabella %>%
+  mutate(Armata_completa = recode(armata, !!!fazioni_mappa))
+
+
+
+colnames(matchups)[5] <- "Orks"
+colnames(matchups)[20] <- "Adepta_Sororitas"
+
+df_matchup_long <- matchups %>%  #trasformazione dataset da matrice a tabella 
+  pivot_longer(cols = -Fazione, names_to = "opponente", values_to = "risultato")
+                   
+
+# pulizia match NA
+df_matchup_clean <- df_matchup_long %>%   #pulizia match NA per pulire risultato
+  filter(!is.na(risultato) & risultato != "NA")
+
+#---------------------------------RETE GIOCATORI-----------------------------------------------------------
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(igraph) 
+
+
+
+graph <- graph_from_data_frame(df_matchup_clean , directed = TRUE)
+
+# Impostare i colori delle frecce in base al risultato
+E(graph)$color <- ifelse(df_matchup_clean $risultato == "WIN", "green",
+                         ifelse(df_matchup_clean $risultato == "LOSE", "red", "blue"))
+
+
+
+# Visualizzare il grafo
+plot(
+  graph,
+  vertex.label.color = "black",
+  vertex.size = 1,  
+  edge.arrow.size = 0.5,
+  main = "Rete delle partite "
+)
+
+
+
+
+
+
+ #---------------------------------GRAFICO COMPARAZIONI PER MATCH------------------------------------------
+
+
+library(shiny)
+library(ggplot2)
+library(dplyr)
+
+# UI
+ui <- fluidPage(
+  titlePanel("Confronta due fazioni"),
+  
+  # Seleziona la prima fazione
+  selectInput("fazione1", "Seleziona la prima fazione:", 
+              choices = unique(df_matchup_clean$Fazione)),
+  
+  # Seleziona la seconda fazione
+  selectInput("fazione2", "Seleziona la seconda fazione:", 
+              choices = unique(df_matchup_clean$Fazione)),
+  
+  # Seleziona la statistica da visualizzare
+  selectInput("statistica", "Scegli la Statistica:", 
+              choices = colnames(mega_tabella %>% select(-armata, -Armata_completa, -tipo_unità))),
+  selectInput("statistica2", "Scegli la Statistica:", 
+              choices = colnames(mega_tabella %>% select(-armata, -Armata_completa, -tipo_unità))),
+  
+  # Visualizza i grafici delle statistiche delle due fazioni
+  plotOutput("grafico1"),
+  plotOutput("grafico2")
+)
+
+# Server
+server <- function(input, output) {
+  
+  # Filtro dei dati per la prima fazione
+  data_fazione1 <- reactive({
+    mega_tabella %>%
+      filter(Armata_completa == input$fazione1)
+  })
+  
+  # Filtro dei dati per la seconda fazione
+  data_fazione2 <- reactive({
+    mega_tabella %>%
+      filter(Armata_completa == input$fazione2)
+  })
+  
+  # Calcola max e min per la statistica selezionata per la prima fazione
+  max_min_fazione1 <- reactive({
+    df1 <- data_fazione1()
+    df1 %>%
+      group_by(tipo_unità) %>%
+      summarise(
+        max_val = max(as.numeric(!!sym(input$statistica)), na.rm = TRUE),
+        min_val = min(as.numeric(!!sym(input$statistica)), na.rm = TRUE)
+      ) %>%
+      na.omit()
+  })
+  
+  # Calcola max e min per la statistica selezionata per la seconda fazione
+  max_min_fazione2 <- reactive({
+    df2 <- data_fazione2()
+    df2 %>%
+      group_by(tipo_unità) %>%
+      summarise(
+        max_val = max(as.numeric(!!sym(input$statistica2)), na.rm = TRUE),
+        min_val = min(as.numeric(!!sym(input$statistica2)), na.rm = TRUE)
+      ) %>%
+      na.omit()
+  })
+  
+  # Grafico per la prima fazione (Dumbbell Plot)
+  output$grafico1 <- renderPlot({
+    max_min1 <- max_min_fazione1()
+    
+    ggplot(max_min1, aes(x = tipo_unità)) +
+      geom_segment(aes(xend = tipo_unità, y = min_val, yend = max_val), 
+                   color = "green", size = 1) +
+      geom_point(aes(y = max_val), color = "green", size = 4) +
+      geom_point(aes(y = min_val), color = "green", size = 4) +
+      labs(title = paste("Minimo e Massimo per la fazione", input$fazione1),
+           x = "Tipo di Unità", 
+           y = input$statistica) +
+      scale_y_log10() +
+      theme_minimal() +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  })
+  
+  # Grafico per la seconda fazione (Dumbbell Plot)
+  output$grafico2 <- renderPlot({
+    max_min2 <- max_min_fazione2()
+    
+    ggplot(max_min2, aes(x = tipo_unità)) +
+      geom_segment(aes(xend = tipo_unità, y = min_val, yend = max_val), 
+                   color = "green", size = 1) +
+      geom_point(aes(y = max_val), color = "green", size = 4) +
+      geom_point(aes(y = min_val), color = "green", size = 4) +
+      labs(title = paste("Minimo e Massimo per la fazione", input$fazione2),
+           x = "Tipo di Unità", 
+           y = input$statistica2) +
+      scale_y_log10() +
+      theme_minimal() +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  })
+}
+
+# Avvia l'app Shiny
+shinyApp(ui = ui, server = server)
